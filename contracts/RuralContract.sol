@@ -2,24 +2,53 @@ pragma solidity ^0.5.0;
 
 contract RuralContract {
 
+    address[16] public landOwners;
+    uint256 public landCount = 0;
+    mapping(uint256 => LandTitle) public listOfLandTitles;
+
    //Defining the model of the LandTitle
    struct LandTitle {
-       uint id;
-       string ownerFirstName;
-       string ownerLastName;
-       string city;
+       uint _id;
+       string _ownerFirstName;
+       string _ownerLastName;
+       uint256 _latLand;
+       uint256 _longLand;
+       uint256 _areaLand;
+       string _city;
+       string _villageName;
    }
     
-    mapping(uint => LandTitle) public landTitles;
-    uint public landTitlesCount;
-
     //Declare Constructor
-    constructor() public{
-        addLandTitle("Nke", "Yapo", "Ande");
+    constructor() public {
     }
 
-    function addLandTitle(string memory _ownerFirstName,string memory _ownerLastName,string memory _city) private {
-        landTitlesCount ++;
-        landTitles[landTitlesCount] = LandTitle(landTitlesCount, _ownerFirstName, _ownerLastName, _city);
+    //Register your land
+
+    function registerLand(
+        string memory _ownerFirstName,
+        string memory _ownerLastName,
+        uint256  _latLand,
+        uint256  _longLand,
+        uint256  _areaLand, 
+        string memory _city,
+        string memory _villageName
+        ) 
+         public {
+                    landOwners[landCount] =  msg.sender;
+                    listOfLandTitles[landCount] = LandTitle(
+                        landCount,
+                         _ownerFirstName,
+                         _ownerLastName,
+                         _latLand,
+                         _longLand,
+                         _areaLand,
+                         _city,
+                         _villageName
+                         );
     } 
+
+    //Retrieve the list of land owners
+    function getLandOwners() public view returns (address[16] memory) {
+        return landOwners;
+    }
 }
