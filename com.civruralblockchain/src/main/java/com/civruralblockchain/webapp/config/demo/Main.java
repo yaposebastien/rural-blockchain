@@ -5,6 +5,7 @@
  */
 package com.civruralblockchain.webapp.config.demo;
 
+import com.civruralblockchain.webapp.smartRuralContract.RuralContract;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,6 +34,8 @@ public class Main {
 
     private final static String RECIPIENT = "0x7b1128E70bECb5e3B3cffFaB254bc6C76C9EEAD5";
     
+    private final static String RURAL_CONTRACT_ADDRESS = "0x23bbca085784e222cbb4ec21cced7e6c3f292740";
+    
     
     public static void main(String[] args) {
         
@@ -48,6 +51,13 @@ public class Main {
     private Main() throws Exception {
        
          Web3j web3j = Web3j.build(new HttpService());
+         //Retrieve Credentials from Ganache
+         Credentials credentials = getCredentialsFromPrivateKey();
+         
+         RuralContract ruralContract = loadRuralContract(RURAL_CONTRACT_ADDRESS, web3j, credentials);
+         
+         
+        
 
         TransactionManager transactionManager = new RawTransactionManager(
                 web3j,
@@ -66,9 +76,20 @@ public class Main {
 
         System.out.print("Hash of the transaction = " + transactionReceipt.getTransactionHash() + "\n");
         printWeb3Version(web3j);
+        deployRuralContract(web3j, credentials);
         
+        //Display the Rural Contract Address
+        String ruralContractAddress = deployRuralContract(web3j, credentials);
+        System.out.println("The Rural Contract address: " +ruralContractAddress);
+        
+        //Register New Land Title
+        registration("Nke","Yapo",22,45,800,"Abidjan","Attecoube");
+        
+       
+        
+       
+       
     }
-    
     
     
     //Function to print The client version of Web3
@@ -99,5 +120,40 @@ public class Main {
         return Credentials.create(PRIVATE_KEY);
         
     }
+    
+    //Function to deploy our RuralContract
+    private String deployRuralContract(Web3j web3j, Credentials credentials) throws Exception {
+        
+        return RuralContract.deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT)
+                .send()
+                .getContractAddress();
+    }
+    
+    //Function helps to load the Rural Smart Contract
+    private RuralContract loadRuralContract(String ruralContractAddress, Web3j web3j, Credentials credentials) {
+        
+        return RuralContract.load(ruralContractAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        
+    }
+    
+    //Function helps to register a new land title
+    private void registration(String firstName, String lastName,double geoLatLand,
+                                double geoLongLand, double areaLand, 
+                                String city, String villageName) 
+    {
+        try {
+             Credentials credentials = getCredentialsFromPrivateKey();
+               Web3j web3j = Web3j.build(new HttpService());
+             RuralContract ruralContract = loadRuralContract(RURAL_CONTRACT_ADDRESS, web3j, credentials);
+             TransactionReceipt receipt = ruralContract.registerLandTitle(firstName, lastName, GAS_LIMIT, GAS_LIMIT, GAS_LIMIT, city, villageName).send();
+             System.out.println( "Land Registration Hash : " + receipt.getTransactionHash());
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    //Function helps to remove land title
+    
     
 }
